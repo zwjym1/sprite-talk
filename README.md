@@ -7,7 +7,7 @@ One still + a few mouth/blink overlays + a voice track → a talking 2D host vid
 
 ## 演示 / Demo
 
-https://github.com/zwjym1/sprite-talk/raw/main/examples/host_o/demo.mp4
+https://github.com/zwjym1/sprite-talk/raw/master/examples/host_o/demo.mp4
 
 [examples/host_o/demo.mp4](examples/host_o/demo.mp4)（host_o 示例，约 0.7 MB / sample render, ~0.7 MB）
 
