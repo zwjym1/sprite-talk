@@ -5,6 +5,23 @@ One still + a few mouth/blink overlays + a voice track → a talking 2D host vid
 
 [中文](#中文) | [English](#english)
 
+## 演示 / Demo
+
+https://github.com/zwjym1/sprite-talk/raw/main/examples/host_o/demo.mp4
+
+[examples/host_o/demo.mp4](examples/host_o/demo.mp4)（host_o 示例，约 0.7 MB / sample render, ~0.7 MB）
+
+## 动作预设 / Motion presets
+
+| `--preset` | 说明 / Description |
+|---|---|
+| （默认 default）`GENERIC_LOOP` | 通用 25 帧循环曲线，`--dy-gain 0.75` / generic 25-frame loop |
+| `aning_v4` | 已验收的 v4 说话动作（\|sin\| 点头）/ approved v4 talk motion |
+| `aning_feel` | 舒缓版，动而不晃 / calmer, moves without shaking |
+| `aning_dyn` | 12 帧循环、跟随响度包络的更动态版本 / livelier, envelope-driven |
+
+预设只包含数值参数（见 `sprite_talk/presets.py`），不含任何参考视频素材。Presets are numeric parameters only; no reference footage is included.
+
 ---
 
 ## 中文
@@ -131,3 +148,21 @@ As a round-trip check, calibrating on the demo render returns gain 1.0, which is
 ### License
 
 MIT. The Host A example assets (an original character and our own TTS voice-over) are under the same license. See `examples/host_a/ASSETS.md`.
+
+## Motion preset `aning_v4`
+
+`--preset aning_v4` reproduces the approved host-A v4 talk motion (see `sprite_talk/presets.py`):
+bottom-pinned linear warp, rigid above 0.307 head-heights over the chin; while speaking
+`dx = 0.0288*hh*g*(1-cos θ)/2`, `dy = 0.0559*hh*g*|sin θ|`, `θ = 2π(t-onset)/(12.5 f)`;
+gate attack 0.45 / release 0.16; idle breathing 0.0022*hh @ 0.25 Hz. Pass `--head-px`
+(hair top->chin) and `--chin-y`. Differs from default `GENERIC_LOOP`
+(25 f loop, bipolar ±0.016 sway, one big + one small dip, x0.75 dy-gain, pivot 0.355).
+
+## Motion preset `aning_feel`
+
+`--preset aning_feel` is the comfortable Aning workflow profile (moves, does not shake).
+Matched to Skill SideTalk remeasure (AY≈0.050 HH, AX≈0.0295 HH): `dy = AY*g*sin²θ`,
+`dx = AX*g*(1-cos(θ+70°))/2`, continuous clock `T=18 f @30fps` (no onset reset),
+soft gate attack 0.22 / release 0.12, same bottom-anchored `LinearPinWarp` as v4.
+Use this when `aning_v4`'s `|sin|` bob feels too bouncy. Default preset is unchanged
+(still `GENERIC_LOOP` unless `--preset` is passed).

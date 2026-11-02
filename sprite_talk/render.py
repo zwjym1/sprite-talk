@@ -11,7 +11,8 @@ LEVEL_KEYS = ("closed", "small", "large")
 
 
 def render(sprites_cfg, audio, out, fps=30, curve=None, amp=1.0, dy_gain=0.75, piv_ratio=0.355,
-           alignment=None, visemes=False, bg=(0, 0, 0), seed=0, dur=None, crf=18):
+           alignment=None, visemes=False, bg=(0, 0, 0), seed=0, dur=None, crf=18, preset=None,
+           head_px=None, chin_y=None):
     S = SpriteSet(sprites_cfg)
     dur = dur or audio_duration(audio)
     n = int(round(dur * fps))
@@ -28,7 +29,17 @@ def render(sprites_cfg, audio, out, fps=30, curve=None, amp=1.0, dy_gain=0.75, p
     eye_key = {1: "half", 2: "closed"}
     W = BodyWarp.for_sprite(S.base, piv_ratio=piv_ratio)
     talking = env > 0.08
-    dx, dy = bob_series(n, W.head_height, load_curve(curve), fps, amp, dy_gain, talking)
+    if preset:
+        from .presets import PRESETS, series_for_preset, LinearPinWarp
+        pp = PRESETS[preset]
+        top = W.top
+        hh = head_px or (chin_y - top if chin_y else W.head_height / 0.355 * 0.5)  # fallback: chin ~ half silhouette
+        chin = chin_y or top + hh
+        W = LinearPinWarp(S.base.shape, chin - pp["rigid_above_chin"] * hh, S.H - 1)
+        W.head_height = hh
+        dx, dy, _ = series_for_preset(preset, n, hh, talking, fps, amp, env=env)
+    else:
+        dx, dy = bob_series(n, W.head_height, load_curve(curve), fps, amp, dy_gain, talking)
     H, Wd = S.H - S.H % 2, S.W - S.W % 2
     bgc = np.array(bg, np.float32)
     p = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{Wd}x{H}",
@@ -44,5 +55,5 @@ def render(sprites_cfg, audio, out, fps=30, curve=None, amp=1.0, dy_gain=0.75, p
     p.wait()
     if p.returncode:
         raise RuntimeError("ffmpeg failed")
-    return dict(frames=n, head_px=round(W.head_height, 1), piv=round(W.piv, 1),
+    return dict(frames=n, preset=preset, head_px=round(W.head_height, 1), piv=round(getattr(W, 'piv', getattr(W, 'rigid_y', 0)), 1),
                 frac_open=round(float((lvl > 0).mean()), 3), blinks=len([1 for v in blinks.values() if v == 2]))

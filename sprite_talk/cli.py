@@ -17,6 +17,9 @@ def main(argv=None):
     r.add_argument("--piv-ratio", type=float, default=0.355); r.add_argument("--alignment")
     r.add_argument("--visemes", action="store_true"); r.add_argument("--seed", type=int, default=0)
     r.add_argument("--dur", type=float); r.add_argument("--bg", default="0,0,0")
+    r.add_argument("--preset", choices=["aning_v4", "aning_feel", "aning_dyn"], help="motion preset (overrides --curve/--dy-gain/--piv-ratio)")
+    r.add_argument("--head-px", type=float, help="head height hair-top->chin (px) for --preset")
+    r.add_argument("--chin-y", type=float, help="chin row (px) for --preset")
 
     m = sub.add_parser("mouth", help="print per-frame mouth levels")
     m.add_argument("audio"); m.add_argument("--alignment"); m.add_argument("--fps", type=int, default=30)
@@ -45,7 +48,8 @@ def main(argv=None):
     if x.cmd == "render":
         from .render import render
         print(json.dumps(render(x.sprites, x.audio, x.out, x.fps, x.curve, x.amp, x.dy_gain, x.piv_ratio,
-                                x.alignment, x.visemes, _box(x.bg), x.seed, x.dur)))
+                                x.alignment, x.visemes, _box(x.bg), x.seed, x.dur,
+                                preset=x.preset, head_px=x.head_px, chin_y=x.chin_y)))
     elif x.cmd == "mouth":
         from .mouth import audio_rms, audio_duration, mouth_levels, load_alignment
         n = int(round(audio_duration(x.audio) * x.fps))
