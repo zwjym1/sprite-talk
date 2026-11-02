@@ -1,0 +1,8 @@
+{
+  "base": "sprites/base.png",
+  "overlay_offset": [330, 420],
+  "mouth_roi": [425, 578, 545, 672],
+  "eye_roi": [322, 440, 618, 580],
+  "mouth": {"closed": "sprites/m_closed.png", "small": "sprites/m_E.png", "large": "sprites/m_A.png"},
+  "eyes": {"half": "sprites/e_half.png", "closed": "sprites/e_closed.png"}
+}
